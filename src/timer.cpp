@@ -11,10 +11,6 @@
 NS_HIVE_BEGIN
 
 bool TimerObject::setTimer(int64 timeCount, Timer* pTimer){
-//	if(NULL != m_pTimerList && NULL != m_pTimerList->m_pTimer){
-//		return m_pTimerList->m_pTimer->timerAdd(this, timeCount);
-//	}
-//	return false;
 	return pTimer->timerAdd(this, timeCount);
 }
 bool TimerObject::clearTimer(void){

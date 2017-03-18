@@ -10,7 +10,7 @@
 
 NS_HIVE_BEGIN
 
-Epoll::Epoll() : RefObject(), m_pWorker(NULL), m_epollfd(0) {
+Epoll::Epoll() : RefObject(), m_epollfd(0) {
 
 }
 Epoll::~Epoll(){

@@ -7,17 +7,13 @@
 //
 
 #include "accept.h"
-#include "epoll.h"
-#include "globalservice.h"
-#include "epollworker.h"
-#include "mainworker.h"
+#include "proxy.h"
 
 NS_HIVE_BEGIN
 
-Accept::Accept(void) : EpollConnectObject(), Destination(), TimerObject(),
+Accept::Accept(void) : EpollObject(), Object1616(), TimerObject(),
  	m_timerCallback(NULL), m_pEpollWorker(NULL), m_tempReadPacket(NULL), m_bindHandle(0),
- 	m_connectionState(CS_DISCONNECT), m_isOnline(0),
-	m_isNeedEncrypt(false), m_isNeedDecrypt(false) {
+ 	m_connectionState(CS_DISCONNECT) {
 
 }
 Accept::~Accept(void){
@@ -72,16 +68,6 @@ void Accept::epollCheck(void){
 	}else{
 		getEpoll()->objectChange(this, EPOLLIN | EPOLLOUT);
 	}
-}
-int64 Accept::timerCallback(void){
-	if(NULL != m_timerCallback){
-		return m_timerCallback(this);
-	}
-	return -1;
-}
-bool Accept::setTimeout(int64 timeCount, Timer* pTimer, ConnectTimeoutCallback callback){
-	m_timerCallback = callback;
-	return setTimer(timeCount, pTimer);
 }
 
 void Accept::releasePacket(void){

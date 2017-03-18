@@ -10,18 +10,18 @@
 #define __hive__listener__
 
 #include "epoll.h"
-#include "destination.h"
+#include "object.h"
 
 NS_HIVE_BEGIN
 
 
-#define MAX_LISTEN_SIZE 100000
+#define MAX_LISTEN_SIZE 10000
 
 class Listener;
 
 typedef void (*AcceptSocketFunction)(int fd, const char* ip, uint16 port, Listener* pListener);
 
-class Listener : public EpollObject, public Destination
+class Listener : public EpollObject, public Object1616
 {
 public:
 	Listener(void);
@@ -50,17 +50,8 @@ public:
 	void setAcceptSocketFunction(AcceptSocketFunction pFunc){ m_acceptSocketFunction = pFunc; }
 	AcceptSocketFunction getAcceptSocketFunction(void){ return m_acceptSocketFunction; }
 	void resetData(void);
-	inline bool isNeedEncrypt(void) const { return m_isNeedEncrypt; }
-	inline void setIsNeedEncrypt(bool need) { m_isNeedEncrypt = need; }
-	inline bool isNeedDecrypt(void) const { return m_isNeedDecrypt; }
-	inline void setIsNeedDecrypt(bool need) { m_isNeedDecrypt = need; }
-	inline uint8 getListenType(void) const { return m_listenType; }
-	inline void setListenType(uint8 type) { m_listenType = type; }
 protected:
 	AcceptSocketFunction m_acceptSocketFunction;
-	bool m_isNeedEncrypt;			// 是否需要解密
-	bool m_isNeedDecrypt;			// 是否需要加密
-	uint8 m_listenType;				// 监听的类型
 };
 
 NS_HIVE_END

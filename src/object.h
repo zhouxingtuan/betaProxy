@@ -106,54 +106,113 @@ protected:
 	Handle m_handle;
 };
 
-class Object080816
+#define DEFAULT_MAX_OBJECT_POOL MAX_1616_HASH_SIZE
+
+template<class _OBJECT_>
+class ObjectPool : public RefObject
 {
 public:
-	typedef uint32 handle_type;
-	typedef uint32 version_type;
-	typedef uint32 index_type;
-	typedef uint32 type_type;
-	typedef struct Handle{
-		union{
-			struct{
-				version_type 	version 	: 8;	// 版本
-				type_type 		type 		: 8;	// 版本
-				index_type 		index 		: 16;	// 下标
-			};
-			handle_type 		handle 		: 32;	// 句柄
-		};
-	public:
-		Handle(handle_type h){ this->handle = h; }
-		Handle(void) : handle(0) {}
-		~Handle(void){}
-
-		inline type_type getType(void) const { return this->type; }
-		inline index_type getIndex(void) const { return this->index; }
-		inline version_type getVersion(void) const { return this->version; }
-		inline handle_type getHandle(void) const { return this->handle; }
-		inline void setType(type_type t){ this->type = t; }
-		inline void setIndex(index_type index){ this->index = index; }
-		inline void increaseVersion(void){ ++(this->version); }
-		inline bool operator==(handle_type h) const { return (this->handle == h); }
-		inline bool operator==(const Handle& h) const{ return (this->handle == h.handle); }
-		inline bool operator<(handle_type h) const { return (this->handle < h); }
-		inline bool operator<(const Handle& h) const { return (this->handle < h.handle); }
-		inline Handle& operator=(handle_type h){ this->handle = h; return *this; }
-	}Handle;
+	typedef std::vector<void*> ObjectVector;
+	typedef std::vector<typename _OBJECT_::handle_type> HandleVector;
 public:
-	Object080816(void) : m_handle(0) {}
-	virtual ~Object080816(void){}
+	ObjectPool(void) : RefObject(), m_maxHashNumber(DEFAULT_MAX_OBJECT_POOL) {
+		m_objects.resize(1, NULL);	// 下标为0的值不使用
+	}
+	virtual ~ObjectPool(void){
+		clear();
+	}
 
-	inline type_type getType(void) const { return m_handle.getType(); }
-	inline index_type getIndex(void) const { return m_handle.getIndex(); }
-	inline version_type getVersion(void) const { return m_handle.getVersion(); }
-	inline handle_type getHandle(void) const { return m_handle.getHandle(); }
-	inline void setType(type_type t) { m_handle.setType(t); }
-	inline void setIndex(index_type index) { m_handle.setIndex(index); }
-	inline void increaseVersion(void) { m_handle.increaseVersion(); }
-	inline void setHandle(handle_type handle) { m_handle = handle; }
+	// 当超出最大缓存数值的时候，会返回NULL
+	_OBJECT_* create(void){
+		typename _OBJECT_::index_type index;
+		struct _OBJECT_::Handle h;
+		_OBJECT_* pObj;
+		if( !m_idleHandle.empty() ){
+			h = m_idleHandle.back();
+			m_idleHandle.pop_back();
+			index = h.getIndex();
+			pObj = (_OBJECT_*)m_objects[index];
+			if( NULL == pObj ){
+				pObj = _OBJECT_::createObject();
+				pObj->setHandle(h.getHandle());
+				m_objects[index] = pObj;
+			}
+		}else{
+			index = (typename _OBJECT_::index_type)m_objects.size();
+			if(index > m_maxHashNumber){
+				return NULL;
+			}
+			pObj = _OBJECT_::createObject();
+			pObj->setIndex(index);
+			m_objects.push_back(pObj);
+		}
+		return pObj;
+	}
+	_OBJECT_* get(typename _OBJECT_::handle_type handle){
+		_OBJECT_* pObj = NULL;
+		struct _OBJECT_::Handle h(handle);
+		typename _OBJECT_::index_type index = h.getIndex();
+		if( index < (typename _OBJECT_::index_type)m_objects.size() ){
+			pObj = (_OBJECT_*)m_objects[index];
+		}
+		if( NULL != pObj && pObj->getHandle() == handle ){
+			return pObj;
+		}
+		return NULL;
+	}
+	bool idle(_OBJECT_* pObj){
+		return idle(pObj->getHandle());
+	}
+	bool idle(typename _OBJECT_::handle_type handle){
+		_OBJECT_* pObj = NULL;
+		struct _OBJECT_::Handle h(handle);
+		typename _OBJECT_::index_type index = h.getIndex();
+		if( index < (typename _OBJECT_::index_type)m_objects.size() ){
+			pObj = (_OBJECT_*)m_objects[index];
+		}
+		if( NULL != pObj && pObj->getHandle() == handle ){
+			pObj->increaseVersion();
+			m_idleHandle.push_back(pObj->getHandle());
+			return true;
+		}
+		return false;
+	}
+	bool remove(_OBJECT_* pObj){
+		return remove(pObj->getHandle());
+	}
+	bool remove(typename _OBJECT_::handle_type handle){
+		_OBJECT_* pObj = NULL;
+		struct _OBJECT_::Handle h(handle);
+		typename _OBJECT_::index_type index = h.getIndex();
+		if( index < (typename _OBJECT_::index_type)m_objects.size() ){
+			pObj = (_OBJECT_*)m_objects[index];
+		}
+		if( NULL != pObj && pObj->getHandle() == handle ){
+			m_objects[index] = NULL;
+			_OBJECT_::releaseObject(pObj);
+			h.increaseVersion();
+			m_idleHandle.push_back(h.getHandle());
+			return true;
+		}
+		return false;
+	}
+	void clear(void){
+		for(auto pObj : m_objects){
+			_OBJECT_::releaseObject((_OBJECT_*)pObj);
+		}
+		m_objects.clear();
+		m_objects.resize(1, NULL);	// 下标为0的值不使用
+		m_idleHandle.clear();
+	}
+	uint32 size(void) const { return (uint32)m_objects.size(); }
+	uint32 getMaxHashNumber(void) const { return m_maxHashNumber; }
+	void setMaxHashNumber(uint32 number) { m_maxHashNumber = number; }
+	uint32 getIdleSize(void) const { return (uint32)m_idleHandle.size(); }
+	ObjectVector& getObjectVector(void) { return m_objects; }
 protected:
-	Handle m_handle;
+	ObjectVector m_objects;
+	HandleVector m_idleHandle;
+	uint32 m_maxHashNumber;
 };
 
 NS_HIVE_END

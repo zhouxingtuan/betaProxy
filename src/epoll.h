@@ -24,7 +24,6 @@ typedef struct SocketInformation{
 }SocketInformation;
 
 class Epoll;
-class ActiveWorker;
 
 class EpollObject
 {
@@ -70,15 +69,11 @@ inline bool set_non_blocking(int fd){
 class Epoll : public RefObject
 {
 protected:
-	ActiveWorker* m_pWorker;
 	int m_epollfd;
 	struct epoll_event m_events[MAX_WAIT_EVENT_SIZE];
 public:
 	Epoll(void);
 	virtual ~Epoll(void);
-
-	void setWorker(ActiveWorker* pWorker) { m_pWorker = pWorker; }
-	ActiveWorker* getWorker(void) { return m_pWorker; }
 
 	// EPOLLIN | EPOLLOUT | EPOLLET
 	inline bool objectAdd(EpollObject* pObject, uint32 events=EPOLLIN){

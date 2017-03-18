@@ -10,6 +10,26 @@
 
 NS_HIVE_BEGIN
 
+Proxy::Proxy(void) : RefObject() {
 
+}
+Proxy::~Proxy(void){
+	Proxy::destroy();
+}
+
+static Proxy* g_pProxy = NULL;
+Proxy* Proxy::getInstance(void){
+	return g_pProxy;
+}
+Proxy* Proxy::createInstance(void){
+	if(g_pProxy == NULL){
+		g_pProxy = new Proxy();
+		SAFE_RETAIN(g_pProxy)
+	}
+	return g_pProxy;
+}
+void Proxy::destroyInstance(void){
+    SAFE_RELEASE(g_pProxy)
+}
 
 NS_HIVE_END

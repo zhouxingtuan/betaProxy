@@ -10,8 +10,7 @@
 #define __hive__timer__
 
 #include "common.h"
-#include "objectpool.h"
-#include "task.h"
+#include "object.h"
 
 NS_HIVE_BEGIN
 

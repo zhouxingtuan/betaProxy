@@ -10,7 +10,6 @@
 #define __hive__client__
 
 #include "accept.h"
-#include "task.h"
 
 NS_HIVE_BEGIN
 
@@ -20,10 +19,10 @@ public:
 	Client(void);
 	virtual ~Client(void);
 
-	static Destination* createObject(void){
+	static Client* createObject(void){
 		return new Client();
 	}
-	static void releaseObject(Destination* pObj){
+	static void releaseObject(Client* pObj){
 		if(NULL != pObj){
 			delete pObj;
 		}
