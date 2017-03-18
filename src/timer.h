@@ -55,7 +55,7 @@ public:
 	virtual ~TimerObject(void){ clearTimer(); }
 
 	virtual bool isActive(void) const { return (NULL != m_pTimerList); }
-	virtual bool setTimer(int64 timeCount, Timer* pTimer);
+	virtual bool setTimer(int64 timeCount, Timer* pTimer=NULL);
 	virtual bool clearTimer(void);
 	virtual int64 timerCallback(void) = 0;
 

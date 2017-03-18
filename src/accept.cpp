@@ -12,7 +12,7 @@
 NS_HIVE_BEGIN
 
 Accept::Accept(void) : EpollObject(), Object1616(), TimerObject(),
- 	m_timerCallback(NULL), m_tempReadPacket(NULL), m_bindHandle(0),
+ 	m_timerCallback(NULL), m_tempReadPacket(NULL), m_pPartner(NULL), m_bindHandle(0),
  	m_connectionState(CS_DISCONNECT) {
 
 }
@@ -69,6 +69,24 @@ void Accept::epollCheck(void){
 	}
 }
 
+int64 Accept::timerCallback(void){
+	if(NULL != m_timerCallback){
+		return m_timerCallback(this);
+	}
+	return -1;
+}
+bool Accept::setTimeout(int64 timeCount, ConnectTimeoutCallback callback){
+	m_timerCallback = callback;
+	return setTimer(timeCount, NULL);
+}
+void Accept::closeConnect(void){
+	if(NULL != m_pPartner){
+		m_pPartner->setPartner(NULL);
+		m_pPartner->epollRemove();
+		m_pPartner = NULL;
+	}
+	this->epollRemove();
+}
 void Accept::releasePacket(void){
 	for( auto pPacket : m_packetQueue ){
 		pPacket->release();

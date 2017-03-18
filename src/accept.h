@@ -25,6 +25,8 @@ enum ConnectionState {
 	CS_CONNECT_OK,
 };
 
+typedef int64 (*ConnectTimeoutCallback)(Accept* pAccept);
+
 class Accept;
 
 class Accept : public EpollObject, public Object1616, public TimerObject
@@ -32,8 +34,10 @@ class Accept : public EpollObject, public Object1616, public TimerObject
 public:
 	typedef std::deque<Packet*> PacketQueue;
 protected:
+	ConnectTimeoutCallback m_timerCallback;	// 回调函数
 	PacketQueue m_packetQueue;
 	Packet* m_tempReadPacket;
+	Accept* m_pPartner;
 	unsigned char m_connectionState;
 public:
 	explicit Accept(void);
@@ -58,6 +62,11 @@ public:
 	// from TimerObject
 	virtual int64 timerCallback(void);
 
+	void closeConnect(void);
+
+	bool setTimeout(int64 timeCount, ConnectTimeoutCallback callback);
+	inline void setPartner(Accept* pAccept){ m_pPartner = pAccept; }
+	inline Accept* getPartner(void){ return m_pPartner; }
 	bool sendPacket(Packet* pPacket);
 	inline void setConnectionState(unsigned char state) { m_connectionState = state; }
 	inline unsigned char getConnectionState(void) const { return (unsigned char)m_connectionState; }

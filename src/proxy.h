@@ -22,6 +22,8 @@
 
 NS_HIVE_BEGIN
 
+#define CONNECT_IDENTIFY_TIME 10000
+
 class ProxyLogic
 {
 public:
@@ -29,14 +31,16 @@ public:
 	virtual ~ProxyLogic(void){}
 
 	// receive connection called
-	virtual void onReceiveAccept(uint32 handle) = 0;
+	virtual void onReceiveAccept(uint32 handle, const char* ip, uint16 port) = 0;
 	// receive message from accept;
 	// after client to back server create success this will never call again;
 	virtual void onReceiveMessage(Buffer* pBuffer) = 0;
+	// client open start
+	virtual void onOpenClientStart(uint32 handle) = 0;
 	// client connection to back server success
 	virtual void onOpenClientSuccess(uint32 handle) = 0;
 	// client connection to back server failed
-	virtual void onOpenClientFailed(uint32 handle) = 0;
+	virtual void onOpenClientSuccess(uint32 handle) = 0;
 	// front direction close the connection
 	virtual void onAcceptClosed(uint32 handle) = 0;
 	// back direction close the connection
@@ -55,6 +59,8 @@ public:
 	ListenerPool* m_pListenerPool;
 	AcceptPool* m_pAcceptPool;
 	ClientPool* m_pClientPool;
+	ProxyLogic* m_pProxyLogic;
+	int m_conn
 public:
 	Proxy(void);
 	virtual ~Proxy(void);
@@ -62,6 +68,12 @@ public:
 	static Proxy* getInstance(void);
 	static Proxy* createInstance(void);
 	static void destroyInstance(void);
+	static int64 checkAcceptIdentify(Accept* pAccept);
+
+	// create accept->client partner ship;
+	// input accept handle;
+	// output client handle
+	uint32 openPartner(uint32 handle);
 
 	uint32 openListener(const char* ip, uint16 port, AcceptSocketFunction pFunc);
 	uint32 openAccept(int fd, const char* ip, uint16 port);
@@ -80,6 +92,12 @@ public:
 	void initialize(void);
 	void destroy(void);
 
+	inline void setProxyLogic(ProxyLogic* pProxyLogic){
+		m_pProxyLogic = pProxyLogic;
+	}
+	inline ProxyLogic* getProxyLogic(void){
+		return m_pProxyLogic;
+	}
 	inline Epoll* getEpoll(void){ return m_pEpoll; }
 	inline Timer* getTimer(void){ return m_pTimer; }
 public:

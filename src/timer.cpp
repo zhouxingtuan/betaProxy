@@ -7,11 +7,16 @@
 //
 
 #include "timer.h"
+#include "proxy.h"
 
 NS_HIVE_BEGIN
 
 bool TimerObject::setTimer(int64 timeCount, Timer* pTimer){
-	return pTimer->timerAdd(this, timeCount);
+	if(NULL == pTimer){
+		return Proxy::getInstance()->getTimer()->timerAdd(this, timeCount);
+	}else{
+		return pTimer->timerAdd(this, timeCount);
+	}
 }
 bool TimerObject::clearTimer(void){
 	if(NULL != m_pTimerList){

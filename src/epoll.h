@@ -30,6 +30,8 @@ class EpollObject
 protected:
 	Epoll* m_pEpoll;
 	int m_fd;
+    char m_ip[IP_SIZE];//192.168.110.110
+    uint16 m_port;
 public:
 	EpollObject(void) : m_pEpoll(NULL), m_fd(0) {
 
@@ -57,6 +59,12 @@ public:
 	inline Epoll* getEpoll(void){ return m_pEpoll; }
 	inline int getSocketFD(void) const { return m_fd; }
 	inline void setSocketFD(int fd){ m_fd = fd; }
+	inline void setSocket(const char* ip, uint16 port){
+		strcpy(m_ip, ip);
+		m_port = port;
+	}
+	inline const char* getIP(void) const { return m_ip; }
+	inline const uint16 getPort(void) const { return m_port; }
 };
 
 inline bool set_non_blocking(int fd){

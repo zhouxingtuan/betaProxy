@@ -7,10 +7,7 @@
 //
 
 #include "client.h"
-#include "epoll.h"
-#include "globalservice.h"
-#include "epollworker.h"
-#include "mainworker.h"
+#include "proxy.h"
 
 NS_HIVE_BEGIN
 
@@ -52,8 +49,7 @@ bool Client::epollActive(uint32 events){
 		if( getsockopt(this->getSocketFD(), SOL_SOCKET, SO_ERROR, &error, &len) < 0 ){
 			fprintf(stderr, "--Client::epollActive 1 failed to connect to handle=%d ip=%s port=%d\n", getHandle(), getIP(), getPort());
 			closeSocket();
-			getEpollWorker()->notifyCloseConnect(this);
-			getEpollWorker()->closeClient(this->getHandle());
+			Proxy::getInstance()->closeClient(this->getHandle());
 		}
 		if(error){
 			if(error == EINTR || error == EINPROGRESS){
@@ -62,20 +58,18 @@ bool Client::epollActive(uint32 events){
 			}
 			fprintf(stderr, "--Client::epollActive 2 failed to connect to handle=%d ip=%s port=%d\n", getHandle(), getIP(), getPort());
 			closeSocket();
-			getEpollWorker()->notifyCloseConnect(this);
-			getEpollWorker()->closeClient(this->getHandle());
+			Proxy::getInstance()->closeClient(this->getHandle());
 			return true;
 		}
 		fprintf(stderr, "--Client::epollActive connect OK to handle=%d ip=%s port=%d\n", getHandle(), getIP(), getPort());
-		getEpollWorker()->receiveClient(this);
+		Proxy::getInstance()->receiveClient(this);
 		return true;
 	}
 //	fprintf(stderr, "--Client::epollActive OK getConnectionState()=%d\n", getConnectionState());
 	return false;
 }
 void Client::epollRemove(void){
-	getEpollWorker()->notifyCloseConnect(this);
-	getEpollWorker()->closeClient(this->getHandle());
+	Proxy::getInstance()->closeClient(this->getHandle());
 }
 
 NS_HIVE_END
