@@ -34,7 +34,7 @@ void Proxy::destroyInstance(void){
 }
 int64 Proxy::checkAcceptIdentify(Accept* pAccept){
 	fprintf(stderr, "--Proxy::checkAcceptIdentify handle=%d\n", pAccept->getHandle());
-	pAccept->closeConnect();
+	pAccept->epollRemove();
 	return -1;
 }
 
@@ -117,12 +117,12 @@ uint32 Proxy::openClient(const char* ip, uint16 port){
 		return 0;
 	}
 	fprintf(stderr, "--Proxy::openClient handle=%d ip=%s port=%d bindHandle=%d\n", handle, ip, port, bindHandle);
-	m_pProxyLogic->onOpenClientStart(handle);
 	return handle;
 }
 void Proxy::receiveClient(Client* pClient){
 	pClient->setConnectionState(CS_CONNECT_OK);
-	m_pProxyLogic->onOpenClientSuccess(pClient);
+	// todo 检查accept消息，把缓存发送到server
+
 }
 
 Listener* Proxy::getListener(uint32 handle){

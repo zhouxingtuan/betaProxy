@@ -62,7 +62,7 @@ public:
 	// from TimerObject
 	virtual int64 timerCallback(void);
 
-	void closeConnect(void);
+	void closePartner(void);
 
 	bool setTimeout(int64 timeCount, ConnectTimeoutCallback callback);
 	inline void setPartner(Accept* pAccept){ m_pPartner = pAccept; }

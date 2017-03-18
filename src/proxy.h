@@ -35,16 +35,6 @@ public:
 	// receive message from accept;
 	// after client to back server create success this will never call again;
 	virtual void onReceiveMessage(Buffer* pBuffer) = 0;
-	// client open start
-	virtual void onOpenClientStart(uint32 handle) = 0;
-	// client connection to back server success
-	virtual void onOpenClientSuccess(uint32 handle) = 0;
-	// client connection to back server failed
-	virtual void onOpenClientSuccess(uint32 handle) = 0;
-	// front direction close the connection
-	virtual void onAcceptClosed(uint32 handle) = 0;
-	// back direction close the connection
-	virtual void onClientClosed(uint32 handle) = 0;
 };
 
 typedef ObjectPool<Listener> ListenerPool;

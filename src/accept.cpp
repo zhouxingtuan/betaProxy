@@ -59,6 +59,7 @@ void Accept::epollOut(void){
 	}while(1);
 }
 void Accept::epollRemove(void){
+	this->closePartner();
 	Proxy::getInstance()->closeAccept(this->getHandle());
 }
 void Accept::epollCheck(void){
@@ -79,13 +80,12 @@ bool Accept::setTimeout(int64 timeCount, ConnectTimeoutCallback callback){
 	m_timerCallback = callback;
 	return setTimer(timeCount, NULL);
 }
-void Accept::closeConnect(void){
+void Accept::closePartner(void){
 	if(NULL != m_pPartner){
 		m_pPartner->setPartner(NULL);
 		m_pPartner->epollRemove();
 		m_pPartner = NULL;
 	}
-	this->epollRemove();
 }
 void Accept::releasePacket(void){
 	for( auto pPacket : m_packetQueue ){
