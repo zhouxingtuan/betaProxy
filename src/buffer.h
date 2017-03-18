@@ -18,7 +18,7 @@ typedef std::vector<char> CharVector;
 class Buffer : public RefObject, public CharVector
 {
 protected:
-	std::atomic_flag m_encryptFlag;
+
 public:
 	explicit Buffer(int length);
 	virtual ~Buffer(void);
@@ -45,8 +45,6 @@ public:
 	inline T to(int offset) const {
 		return *((T*)(this->data()+offset));
 	}
-	inline bool checkEncryptFlag(void){ return !m_encryptFlag.test_and_set(); }
-	inline void clearEncryptFlag(void){ m_encryptFlag.clear(); }
 };// end class Buffer
 
 NS_HIVE_END

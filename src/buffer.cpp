@@ -11,7 +11,6 @@
 NS_HIVE_BEGIN
 
 Buffer::Buffer(int length) : RefObject(), CharVector(length, 0) {
-	clearEncryptFlag();
 	this->clear();
 }
 Buffer::~Buffer(void){

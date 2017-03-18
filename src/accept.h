@@ -55,19 +55,10 @@ public:
 	virtual void epollRemove(void);
 	virtual void epollCheck(void);
 
-	// from Destination
-	virtual void onReceivePacket(Packet* pPacket, Task* pTask){
-		sendPacket(pPacket);
-	}
-
 	// from TimerObject
 	virtual int64 timerCallback(void);
 
 	bool sendPacket(Packet* pPacket);
-//	inline int getPingTime(void) const { return m_pingTime; }
-//	inline void setPingTime(int t) { m_pingTime = t; }
-	inline bool isOnline(void) const { return m_isOnline; }
-	inline void setOnline(bool online) { m_isOnline = online; }
 	inline void setConnectionState(unsigned char state) { m_connectionState = state; }
 	inline unsigned char getConnectionState(void) const { return (unsigned char)m_connectionState; }
 	inline bool isIdentify(void) const { return (unsigned char)m_connectionState >= CS_IDENTIFY_OK; }

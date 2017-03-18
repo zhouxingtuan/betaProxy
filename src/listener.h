@@ -43,9 +43,6 @@ public:
 	virtual void epollRemove(void);
 	virtual void epollCheck(void);
 
-	// from Destination
-	virtual void onReceivePacket(Packet* pPacket, Task* pTask){}
-
 	bool openSocket(void);
 	void setAcceptSocketFunction(AcceptSocketFunction pFunc){ m_acceptSocketFunction = pFunc; }
 	AcceptSocketFunction getAcceptSocketFunction(void){ return m_acceptSocketFunction; }

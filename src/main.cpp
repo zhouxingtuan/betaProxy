@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	defaultSignalHandle();
 
 	Proxy::createInstance();
-	Proxy::getInstance()->initialize(1, 2, 2);
+	Proxy::getInstance()->initialize();
 	Proxy::getInstance()->update();
 	fprintf(stderr, "proxy main exit\n");
 	Proxy::destroyInstance();
