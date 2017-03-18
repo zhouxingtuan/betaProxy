@@ -1,5 +1,5 @@
 # betaProxy
-A gateway proxy service with epoll, simple and lightweight. Support Linux Only.
+A proxy server with epoll, simple and lightweight. Support Linux Only.
 
 1) Help you fight against network attcks.
 
