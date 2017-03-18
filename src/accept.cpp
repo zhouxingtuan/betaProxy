@@ -12,7 +12,7 @@
 NS_HIVE_BEGIN
 
 Accept::Accept(void) : EpollObject(), Object1616(), TimerObject(),
- 	m_timerCallback(NULL), m_pEpollWorker(NULL), m_tempReadPacket(NULL), m_bindHandle(0),
+ 	m_timerCallback(NULL), m_tempReadPacket(NULL), m_bindHandle(0),
  	m_connectionState(CS_DISCONNECT) {
 
 }
@@ -59,8 +59,7 @@ void Accept::epollOut(void){
 	}while(1);
 }
 void Accept::epollRemove(void){
-	getEpollWorker()->notifyCloseConnect(this);
-	getEpollWorker()->closeAccept(this->getHandle());
+	Proxy::getInstance()->closeAccept(this->getHandle());
 }
 void Accept::epollCheck(void){
 	if( m_packetQueue.empty() ){
@@ -115,11 +114,7 @@ void Accept::resetData(void){
 	m_isNeedDecrypt = false;
 }
 void Accept::dispatchPacket(Packet* pPacket){
-	// 对收到的消息进行解密处理：从body开始解密；头部已经在判断长度的时候解密
-	if( this->isNeedDecrypt() ){
-		binary_decrypt(pPacket->getDataPtr()+8, pPacket->getLength()-8, MainWorker::getInstance()->getKey());
-	}
-	GlobalService::getInstance()->dispatchToService(pPacket);
+
 }
 int Accept::readSocket(void){
 	static char recvBuffer[8192];
@@ -160,10 +155,6 @@ int Accept::readSocket(void){
 		//这里读取的信息很可能包含多条信息，这时候需要解析出来；这几条信息因为太短，在发送时被底层socket合并了
 		recvBufferPtr = recvBuffer;
         do{
-        	// 对头部数据进行解密
-        	if( this->isNeedDecrypt() ){
-        		binary_decrypt(recvBufferPtr, 8, MainWorker::getInstance()->getKey());
-        	}
             packetLength = *(int*)((void*)(recvBufferPtr));
 			if( packetLength < (int)sizeof(PacketHead) || packetLength > getMaxLength() ){
 				fprintf(stderr, "head length is invalid packetLength=%d\n", packetLength);
@@ -188,15 +179,6 @@ int Accept::readSocket(void){
     return 0;
 }
 int Accept::writeSocket(Packet* pPacket){
-	// 检查是否已经经过加密操作
-	if( pPacket->getBuffer()->checkEncryptFlag() ){
-		// 发送数据前，记录一次数据总长度；确保不会出错
-		pPacket->recordLength();
-		if( this->isNeedEncrypt() ){
-			binary_encrypt(pPacket->getDataPtr(), pPacket->getLength(), MainWorker::getInstance()->getKey());
-		}
-	}
-
     int nwrite;
     nwrite = write(this->getSocketFD(), pPacket->getCursorPtr(), pPacket->getLength()-pPacket->getCursor());
     if(nwrite < 0){

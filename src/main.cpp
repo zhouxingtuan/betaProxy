@@ -15,12 +15,11 @@ int main(int argc, char *argv[])
 	// 使用默认的信号处理
 	defaultSignalHandle();
 
-	MainWorker::createInstance();
-	MainWorker::getInstance()->initialize(1, 2, 2);
-	MainWorker::getInstance()->update();
-//MAIN_EXIT:
-//	sleep(3);
-	MainWorker::destroyInstance();
+	Proxy::createInstance();
+	Proxy::getInstance()->initialize(1, 2, 2);
+	Proxy::getInstance()->update();
+	fprintf(stderr, "proxy main exit\n");
+	Proxy::destroyInstance();
 
 	return 0;
 }
