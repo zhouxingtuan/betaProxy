@@ -25,9 +25,9 @@ enum ConnectionState {
 	CS_CONNECT_OK,
 };
 
-typedef int64 (*ConnectTimeoutCallback)(Accept* pAccept);
-
 class Accept;
+
+typedef int64 (*ConnectTimeoutCallback)(Accept* pAccept);
 
 class Accept : public EpollObject, public Object1616, public TimerObject
 {
