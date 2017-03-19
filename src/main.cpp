@@ -10,7 +10,7 @@
 
 USING_NS_HIVE;
 
-class MyProxyLogic : HiveNS::ProxyLogic
+class MyProxyLogic : public HiveNS::ProxyLogic
 {
 public:
 	MyProxyLogic(void) : HiveNS::ProxyLogic(){}
