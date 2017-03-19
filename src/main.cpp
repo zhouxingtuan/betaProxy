@@ -10,10 +10,10 @@
 
 USING_NS_HIVE;
 
-class MyProxyLogic : ProxyLogic
+class MyProxyLogic : HiveNS::ProxyLogic
 {
 public:
-	MyProxyLogic(void) : ProxyLogic(){}
+	MyProxyLogic(void) : HiveNS::ProxyLogic(){}
 	virtual ~MyProxyLogic(void){}
 
 	// receive connection called
