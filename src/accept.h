@@ -11,7 +11,7 @@
 
 #include "epoll.h"
 #include "object.h"
-#include "buffer.h"
+#include "packet.h"
 #include "timer.h"
 
 NS_HIVE_BEGIN
