@@ -53,6 +53,7 @@ public:
 	AcceptPool* m_pAcceptPool;
 	ClientPool* m_pClientPool;
 	ProxyLogic* m_pProxyLogic;
+	SocketInformation m_listenInfo;
 	int m_desIndex;
 public:
 	Proxy(void);
@@ -61,6 +62,7 @@ public:
 	static Proxy* getInstance(void);
 	static Proxy* createInstance(void);
 	static void destroyInstance(void);
+	static void onAcceptSocket(int fd, const char* ip, uint16 port, Listener* pListener);
 	static int64 checkAcceptIdentify(Accept* pAccept);
 
 	// create accept->client partner ship;
@@ -85,6 +87,7 @@ public:
 	void update(void);
 	void initialize(void);
 	void destroy(void);
+	bool initConfig(void);
 
 	inline void setProxyLogic(ProxyLogic* pProxyLogic){
 		m_pProxyLogic = pProxyLogic;

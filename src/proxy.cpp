@@ -13,7 +13,7 @@ NS_HIVE_BEGIN
 Proxy::Proxy(void) : RefObject(), m_pEpoll(NULL), m_pTimer(NULL),
 	m_pListenerPool(NULL), m_pAcceptPool(NULL), m_pClientPool(NULL), m_pProxyLogic(NULL),
 	m_desIndex(0) {
-
+	memset(&m_listenInfo, 0 , sizeof(m_listenInfo));
 }
 Proxy::~Proxy(void){
 	Proxy::destroy();
@@ -32,6 +32,14 @@ Proxy* Proxy::createInstance(void){
 }
 void Proxy::destroyInstance(void){
     SAFE_RELEASE(g_pProxy)
+}
+void Proxy::onAcceptSocket(int fd, const char* ip, uint16 port, Listener* pListener){
+	uint32 handle = Proxy::getInstance()->openAccept(fd, ip, port);
+	if(handle == 0){
+		fprintf(stderr, "Proxy::onAcceptSocket openAccept failed fd=%d ip=%s port=%d\n", fd, ip, port);
+	}else{
+		Proxy::getInstance()->getProxyLogic()->onReceiveAccept(handle, ip, port);
+	}
 }
 int64 Proxy::checkAcceptIdentify(Accept* pAccept){
 	fprintf(stderr, "--Proxy::checkAcceptIdentify handle=%d\n", pAccept->getHandle());
@@ -117,7 +125,6 @@ uint32 Proxy::openAccept(int fd, const char* ip, uint16 port){
 	pAccept->setConnectionState(CS_CONNECT_OK);
 	pAccept->setTimeout(CONNECT_IDENTIFY_TIME, Proxy::checkAcceptIdentify);
 	fprintf(stderr, "--Proxy::openAccept handle=%d fd=%d ip=%s port=%d\n", handle, fd, ip, port);
-	m_pProxyLogic->onReceiveAccept(handle, ip, port);
 	return handle;
 }
 uint32 Proxy::openClient(const char* ip, uint16 port){
@@ -147,7 +154,7 @@ uint32 Proxy::openClient(const char* ip, uint16 port){
 void Proxy::receiveClient(Client* pClient){
 	pClient->setConnectionState(CS_CONNECT_OK);
 	// todo 检查accept消息，把缓存发送到server
-	
+
 }
 
 Listener* Proxy::getListener(uint32 handle){
@@ -219,6 +226,11 @@ void Proxy::initialize(void){
 		m_pClientPool = new ClientPool();
 		m_pClientPool->retain();
 	}
+	this->initConfig();
+	uint32 listenHandle = openListener(m_listenInfo.ip, m_listenInfo.port, Proxy::onAcceptSocket);
+	if(listenHandle == 0){
+		fprintf(stderr, "listen failed ip=%s port=%d\n", m_listenInfo.ip, m_listenInfo.port);
+	}
 }
 void Proxy::destroy(void){
 	SAFE_RELEASE(m_pEpoll)
@@ -226,6 +238,34 @@ void Proxy::destroy(void){
 	SAFE_RELEASE(m_pListenerPool)
 	SAFE_RELEASE(m_pAcceptPool)
 	SAFE_RELEASE(m_pClientPool)
+}
+void parse_ip_port(SocketInformation* pInfo, const std::string& ip){
+	Token::TokenMap listenMap;
+	Token::split(listen, ":", listenMap);
+	for(auto &kv : listenMap){
+		pInfo->setSocket(kv.first.c_str(), atoi(kv.second.c_str()));
+	}
+}
+bool Proxy::initConfig(void){
+	Token::TokenMap configMap;
+	Token::readConfig("config.ini", configMap);
+	// 解析listen 的ip和端口
+	Token::TokenMap::iterator itCur = configMap.find("listen");
+	if(itCur == configMap.end()){
+		return false;
+	}
+	parse_ip_port(&m_listenInfo, itCur->second);
+	// 解析连接的目的地址
+	std::string mark = "des";
+	for(auto &kv : configMap){
+		if(Token::startWith(kv.first, mark)){
+			SocketInformation info;
+			parse_ip_port(&info, kv.second);
+			m_destinations.push_back(info);
+		}
+	}
+	fprintf(stderr, "listen ip=%s port=%d des size=%d\n", m_listenInfo.ip, m_listenInfo.port, (int)m_destinations.size());
+	return true;
 }
 
 NS_HIVE_END

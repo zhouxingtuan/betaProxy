@@ -21,7 +21,10 @@ void Token::readConfig(const std::string& file, TokenMap& tokenMap){
 	while(!in.eof()){
 		in.getline(buffer, 1024);
 		str = buffer;
-		split(str, "=", tokenMap);
+		trim(str);
+		if((str.c_str())[0] != '#'){
+			split(str, "=", tokenMap);
+		}
 	};
 	in.close();
 }
@@ -56,6 +59,12 @@ void Token::replace(std::string& str, const std::string& rp, const std::string& 
 		str.replace(pos, rp.length(), by);
 		pos = str.find(rp, pos);
 	};
+}
+bool Token::startWith(const std::string& str, const std::string& mark){
+	if(strncmp(str.c_str(), mark.c_str(), mark.length()) == 0){
+		return true;
+	}
+	return false;
 }
 
 NS_HIVE_END

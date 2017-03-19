@@ -20,6 +20,10 @@ NS_HIVE_BEGIN
 typedef struct SocketInformation{
     char ip[IP_SIZE];//192.168.110.110
     uint16 port;
+	void setSocket(const char* ip, uint16 port){
+		strcpy(this->ip, ip);
+		this->port = port;
+	}
 }SocketInformation;
 
 class Epoll;
