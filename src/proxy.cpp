@@ -244,10 +244,11 @@ void Proxy::destroy(void){
 	SAFE_RELEASE(m_pClientPool)
 }
 void parse_ip_port(SocketInformation* pInfo, const std::string& ip){
-	Token::TokenMap listenMap;
-	Token::split(listen, ":", listenMap);
-	for(auto &kv : listenMap){
+	Token::TokenMap ip_port_map;
+	Token::split(ip, ":", ip_port_map);
+	for(auto &kv : ip_port_map){
 		pInfo->setSocket(kv.first.c_str(), atoi(kv.second.c_str()));
+		return;
 	}
 }
 bool Proxy::initConfig(void){
