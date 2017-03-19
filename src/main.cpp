@@ -35,7 +35,7 @@ public:
 		if(clientHandle == 0){
 			fprintf(stderr, "openPartner client failed ip=%s, port=%d\n", pInfo->ip, pInfo->port);
 			Proxy::getInstance()->closeAccept(handle);
-			return
+			return;
 		}
 	}
 };
