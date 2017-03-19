@@ -63,6 +63,7 @@ public:
 	virtual int64 timerCallback(void);
 
 	void closePartner(void);
+	void sendHashBufferToPartner(void);
 
 	bool setTimeout(int64 timeCount, ConnectTimeoutCallback callback);
 	inline void setPartner(Accept* pAccept){ m_pPartner = pAccept; }
@@ -70,7 +71,7 @@ public:
 	bool sendPacket(Packet* pPacket);
 	inline void setConnectionState(unsigned char state) { m_connectionState = state; }
 	inline unsigned char getConnectionState(void) const { return (unsigned char)m_connectionState; }
-	inline bool isIdentify(void) const { return (unsigned char)m_connectionState >= CS_IDENTIFY_OK; }
+	inline bool isIdentify(void) const { return (m_connectionState >= CS_CONNECT_OK); }
 	inline int getMaxLength(void) const {
 		if(isIdentify()){
 			return MAX_LENGTH_IDENTIFY;

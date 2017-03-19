@@ -153,8 +153,13 @@ uint32 Proxy::openClient(const char* ip, uint16 port){
 }
 void Proxy::receiveClient(Client* pClient){
 	pClient->setConnectionState(CS_CONNECT_OK);
-	// todo 检查accept消息，把缓存发送到server
-
+	// 检查accept消息，把缓存发送到server
+	pClient->clearTimer();
+	Accept* pAccept = pClient->getPartner();
+	if(NULL != pAccept){
+		pAccept->clearTimer();
+		pAccept->sendHashBufferToPartner();
+	}
 }
 
 Listener* Proxy::getListener(uint32 handle){
@@ -204,7 +209,6 @@ void Proxy::initialize(void){
 	if(NULL == m_pEpoll){
 		m_pEpoll = new Epoll();
 		m_pEpoll->retain();
-		m_pEpoll->setWorker(this);	// 设置Worker指针
 		if( !m_pEpoll->createEpoll() ){
 			fprintf(stderr, "ERROR Proxy createEpoll failed\n");
 		}

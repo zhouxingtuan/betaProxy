@@ -69,7 +69,6 @@ bool Client::epollActive(uint32 events){
 	return false;
 }
 void Client::epollRemove(void){
-	this->closePartner();
 	Proxy::getInstance()->closeClient(this->getHandle());
 }
 

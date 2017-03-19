@@ -12,7 +12,7 @@
 NS_HIVE_BEGIN
 
 Accept::Accept(void) : EpollObject(), Object1616(), TimerObject(),
- 	m_timerCallback(NULL), m_tempReadPacket(NULL), m_pPartner(NULL), m_bindHandle(0),
+ 	m_timerCallback(NULL), m_tempReadPacket(NULL), m_pPartner(NULL),
  	m_connectionState(CS_DISCONNECT) {
 
 }
@@ -59,7 +59,6 @@ void Accept::epollOut(void){
 	}while(1);
 }
 void Accept::epollRemove(void){
-	this->closePartner();
 	Proxy::getInstance()->closeAccept(this->getHandle());
 }
 void Accept::epollCheck(void){
@@ -86,6 +85,9 @@ void Accept::closePartner(void){
 		m_pPartner->epollRemove();
 		m_pPartner = NULL;
 	}
+}
+void Accept::sendHashBufferToPartner(void){
+
 }
 void Accept::releasePacket(void){
 	for( auto pPacket : m_packetQueue ){
@@ -121,15 +123,13 @@ bool Accept::sendPacket(Packet* pPacket){
 	return true;
 }
 void Accept::resetData(void){
+	closePartner();
 	setConnectionState(CS_DISCONNECT);
 //	setPingTime(0);
 	SAFE_RELEASE(m_tempReadPacket)
 	clearTimer();		// 停止计时器
 	closeSocket();		// 关闭套接字
 	releasePacket();	// 取消所有数据包的发送
-	m_bindHandle = 0;
-	m_isNeedEncrypt = false;
-	m_isNeedDecrypt = false;
 }
 void Accept::dispatchPacket(Packet* pPacket){
 
