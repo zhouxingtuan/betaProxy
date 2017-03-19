@@ -44,7 +44,7 @@ bool Listener::epollActive(uint32 events){
 }
 void Listener::epollRemove(void){
 	fprintf(stderr, "--Listener::epollRemove\n");
-	MainWorker::getInstance()->closeListener(this->getHandle());
+	Proxy::getInstance()->closeListener(this->getHandle());
 }
 void Listener::epollCheck(void){
 	fprintf(stderr, "--Listener::epollCheck\n");
