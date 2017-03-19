@@ -47,7 +47,7 @@ void Listener::epollRemove(void){
 	Proxy::getInstance()->closeListener(this->getHandle());
 }
 void Listener::epollCheck(void){
-	fprintf(stderr, "--Listener::epollCheck\n");
+//	fprintf(stderr, "--Listener::epollCheck\n");
 	getEpoll()->objectChange(this, EPOLLIN);
 }
 void Listener::resetData(void){
