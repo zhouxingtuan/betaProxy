@@ -16,9 +16,6 @@
 
 NS_HIVE_BEGIN
 
-#define MAX_LENGTH_NOT_IDENTIFY 128
-#define MAX_LENGTH_IDENTIFY 4194312	// 4M + 8
-
 enum ConnectionState {
 	CS_DISCONNECT = 0,
 	CS_CONNECT_START,
@@ -74,13 +71,6 @@ public:
 	inline void setConnectionState(unsigned char state) { m_connectionState = state; }
 	inline unsigned char getConnectionState(void) const { return (unsigned char)m_connectionState; }
 	inline bool isIdentify(void) const { return (m_connectionState >= CS_CONNECT_OK); }
-	inline int getMaxLength(void) const {
-		if(isIdentify()){
-			return MAX_LENGTH_IDENTIFY;
-		}else{
-			return MAX_LENGTH_NOT_IDENTIFY;
-		}
-	}
 	void resetData(void);
 protected:
 	int readSocket(void);
