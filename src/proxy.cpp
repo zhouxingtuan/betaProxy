@@ -177,6 +177,7 @@ bool Proxy::closeListener(uint32 handle){
 	if(NULL == pListener){
 		return false;
 	}
+	m_pEpoll->objectRemove(pListener);
 	pListener->resetData();
 	return m_pListenerPool->idle(handle);
 }
@@ -185,6 +186,7 @@ bool Proxy::closeAccept(uint32 handle){
 	if(NULL == pAccept){
 		return false;
 	}
+	m_pEpoll->objectRemove(pAccept);
 	pAccept->resetData();
 	return m_pAcceptPool->idle(handle);
 }
@@ -193,6 +195,7 @@ bool Proxy::closeClient(uint32 handle){
 	if(NULL == pClient){
 		return false;
 	}
+	m_pEpoll->objectRemove(pClient);
 	pClient->resetData();
 	return m_pClientPool->idle(handle);
 }
