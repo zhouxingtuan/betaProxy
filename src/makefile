@@ -1,6 +1,4 @@
 
-THIRD_CURL_INC := ./../third/curl
-
 LIB_NAME := libcore.a
 
 TARGET = proxy
