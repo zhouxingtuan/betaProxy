@@ -11,7 +11,8 @@
 NS_HIVE_BEGIN
 
 Proxy::Proxy(void) : RefObject(), m_pEpoll(NULL), m_pTimer(NULL),
-	m_pListenerPool(NULL), m_pAcceptPool(NULL), m_pClientPool(NULL), m_pProxyLogic(NULL) {
+	m_pListenerPool(NULL), m_pAcceptPool(NULL), m_pClientPool(NULL), m_pProxyLogic(NULL),
+	m_desIndex(0) {
 
 }
 Proxy::~Proxy(void){
@@ -38,6 +39,30 @@ int64 Proxy::checkAcceptIdentify(Accept* pAccept){
 	return -1;
 }
 
+uint32 Proxy::openPartner(uint32 handle, const char* ip, uint16 port){
+	Accept* pAccept = this->getAccept(handle);
+	if(NULL == pAccept){
+		return 0;
+	}
+	uint32 clientHandle = this->openClient(ip, port);
+	if(0 == clientHandle){
+		return 0;
+	}
+	Client* pClient = this->getClient(clientHandle);
+	pAccept->setPartner(pClient);
+	pClient->setPartner(pAccept);
+	return clientHandle;
+}
+SocketInformation* Proxy::getNextDestination(void){
+	int size = (int)m_destinations.size();
+	if(size == 0){
+		return NULL;
+	}
+	if(m_desIndex >= size){
+		m_desIndex = 0;
+	}
+	return &(m_destinations[m_desIndex++]);
+}
 
 uint32 Proxy::openListener(const char* ip, uint16 port, AcceptSocketFunction pFunc){
 	fprintf(stderr, "--Proxy::openListener try to open Listener ip=%s port=%d\n", ip, port);
@@ -122,7 +147,7 @@ uint32 Proxy::openClient(const char* ip, uint16 port){
 void Proxy::receiveClient(Client* pClient){
 	pClient->setConnectionState(CS_CONNECT_OK);
 	// todo 检查accept消息，把缓存发送到server
-
+	
 }
 
 Listener* Proxy::getListener(uint32 handle){

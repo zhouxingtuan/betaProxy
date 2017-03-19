@@ -18,7 +18,6 @@ NS_HIVE_BEGIN
 
 #define IP_SIZE 18
 typedef struct SocketInformation{
-    int fd;
     char ip[IP_SIZE];//192.168.110.110
     uint16 port;
 }SocketInformation;

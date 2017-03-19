@@ -44,13 +44,16 @@ typedef ObjectPool<Client> ClientPool;
 class Proxy : public RefObject
 {
 public:
+	typedef std::vector<SocketInformation> SocketInformationVector;
+public:
+	SocketInformationVector m_destinations;
 	Epoll* m_pEpoll;
 	Timer* m_pTimer;
 	ListenerPool* m_pListenerPool;
 	AcceptPool* m_pAcceptPool;
 	ClientPool* m_pClientPool;
 	ProxyLogic* m_pProxyLogic;
-	int m_conn
+	int m_desIndex;
 public:
 	Proxy(void);
 	virtual ~Proxy(void);
@@ -63,7 +66,8 @@ public:
 	// create accept->client partner ship;
 	// input accept handle;
 	// output client handle
-	uint32 openPartner(uint32 handle);
+	uint32 openPartner(uint32 handle, const char* ip, uint16 port);
+	SocketInformation* getNextDestination(void);
 
 	uint32 openListener(const char* ip, uint16 port, AcceptSocketFunction pFunc);
 	uint32 openAccept(int fd, const char* ip, uint16 port);

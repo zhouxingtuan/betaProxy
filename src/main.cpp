@@ -25,7 +25,18 @@ public:
 	// after client to back server create success this will never call again;
 	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer){
 		// open the partner ? check the first message from front direction ?
-		Proxy::getInstance()->openPartner(handle);
+		SocketInformation* pInfo = Proxy::getInstance()->getNextDestination();
+		if(pInfo == NULL){
+			fprintf(stderr, "can not find a destination in proxy config\n");
+			Proxy::getInstance()->closeAccept(handle);
+			return;
+		}
+		uint32 clientHandle = Proxy::getInstance()->openPartner(handle, pInfo->ip, pInfo->port);
+		if(clientHandle == 0){
+			fprintf(stderr, "openPartner client failed ip=%s, port=%d\n", pInfo->ip, pInfo->port);
+			Proxy::getInstance()->closeAccept(handle);
+			return
+		}
 	}
 };
 
