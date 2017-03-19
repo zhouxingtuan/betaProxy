@@ -33,15 +33,13 @@ $(COBJS): %.o:%.c
 	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
 
 main.o: main.cpp
-	$(CC) $(DEBUG) -c $< -o $@ $(CFLAGS)
+	$(CC) $(DEBUG) -c $< -o $@ $(CXXFLAGS)
 
 $(LIB_NAME):$(OBJS) $(COBJS)
 	$(AR) $(ARFLAGS) $(LIB_NAME) $(OBJS) $(COBJS)
 
 $(TARGET): main.o $(OBJS)
-	$(MAKE) -C ./../third/jemalloc
-	$(MAKE) -C ./..//libcore
-	$(CC) $(DEBUG) main.o $(OBJS) $(STATIC_LIB) -o $(BIN)/$(TARGET) $(CFLAGS)
+	$(CC) $(DEBUG) main.o $(OBJS) $(STATIC_LIB) -o $(BIN)/$(TARGET) $(CXXFLAGS)
 
 clean:
 	-$(RM) $(BIN)/$(TARGET)
