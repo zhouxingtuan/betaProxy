@@ -36,7 +36,7 @@ public:
 protected:
 	ConnectTimeoutCallback m_timerCallback;	// 回调函数
 	PacketQueue m_packetQueue;
-	Packet* m_tempReadPacket;
+	Buffer* m_pBuffer;
 	Accept* m_pPartner;
 	unsigned char m_connectionState;
 public:
@@ -65,10 +65,12 @@ public:
 	void closePartner(void);
 	void sendHashBufferToPartner(void);
 
+	Buffer* getBuffer(int length);
+	bool sendPacket(Packet* pPacket);
+	bool sendPacket(const char* ptr, int length);
 	bool setTimeout(int64 timeCount, ConnectTimeoutCallback callback);
 	inline void setPartner(Accept* pAccept){ m_pPartner = pAccept; }
 	inline Accept* getPartner(void){ return m_pPartner; }
-	bool sendPacket(Packet* pPacket);
 	inline void setConnectionState(unsigned char state) { m_connectionState = state; }
 	inline unsigned char getConnectionState(void) const { return (unsigned char)m_connectionState; }
 	inline bool isIdentify(void) const { return (m_connectionState >= CS_CONNECT_OK); }
@@ -83,6 +85,7 @@ public:
 protected:
 	int readSocket(void);
 	int writeSocket(Packet* pPacket);
+	int writeSocket(const char* ptr, int length, int* writeLength);
 	void dispatchPacket(Packet* pPacket);
 	void releasePacket(void);
 };//end class Accept

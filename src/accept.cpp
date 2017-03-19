@@ -12,13 +12,12 @@
 NS_HIVE_BEGIN
 
 Accept::Accept(void) : EpollObject(), Object1616(), TimerObject(),
- 	m_timerCallback(NULL), m_tempReadPacket(NULL), m_pPartner(NULL),
+ 	m_timerCallback(NULL), m_pBuffer(NULL), m_pPartner(NULL),
  	m_connectionState(CS_DISCONNECT) {
 
 }
 Accept::~Accept(void){
 	releasePacket();
-	SAFE_RELEASE(m_tempReadPacket)
 }
 void Accept::epollIn(void){
 	int result;
@@ -87,7 +86,14 @@ void Accept::closePartner(void){
 	}
 }
 void Accept::sendHashBufferToPartner(void){
-
+	if(NULL == m_pBuffer || NULL == m_pPartner){
+		return;
+	}
+	Packet* pPacket = new Packet(m_pBuffer);
+	pPacket->resetCursor();		// 后面的写操作需要重置
+	pPacket->retain();			// 进入队列前引用
+	m_pPartner->sendPacket(pPacket);
+	SAFE_RELEASE(m_pBuffer)
 }
 void Accept::releasePacket(void){
 	for( auto pPacket : m_packetQueue ){
@@ -122,31 +128,64 @@ bool Accept::sendPacket(Packet* pPacket){
 
 	return true;
 }
+bool Accept::sendPacket(const char* ptr, int length){
+	if( !m_packetQueue.empty() ){
+		Packet* pPacket = new Packet(length);
+		pPacket->write(ptr, length);
+		pPacket->resetCursor();		// 后面的写操作需要重置
+		pPacket->retain();			// 进入队列前引用
+		// 已经在epoll中等待out事件
+		m_packetQueue.push_back(pPacket);
+	}else{
+		// 先执行写操作，如果出现重试，那么再将Packet入队
+		int writeLength = 0;
+		int result = writeSocket(ptr, length, &writeLength);
+		if( result < 0 ){
+			epollRemove();
+		}else{
+			// result == 0 成功写 || result > 0 需要重新尝试写
+			if(length == writeLength){
+				// write success end, do nothing
+			}else{
+				int leftLength;
+				if(result == 0){
+					leftLength = length - writeLength;
+				}else{
+					leftLength = length;
+				}
+				Packet* pPacket = new Packet(leftLength);
+				pPacket->write(ptr + writeLength, leftLength);
+				pPacket->resetCursor();		// 后面的写操作需要重置
+				pPacket->retain();			// 进入队列前引用
+				// 没有写完的消息进入队列
+				m_packetQueue.push_front(pPacket);
+				// 进入epoll等待
+				getEpoll()->objectChange(this, EPOLLIN | EPOLLOUT);
+			}
+		}
+	}
+
+	return true;
+}
 void Accept::resetData(void){
 	closePartner();
 	setConnectionState(CS_DISCONNECT);
-//	setPingTime(0);
-	SAFE_RELEASE(m_tempReadPacket)
 	clearTimer();		// 停止计时器
 	closeSocket();		// 关闭套接字
 	releasePacket();	// 取消所有数据包的发送
+	SAFE_RELEASE(m_pBuffer)
 }
-void Accept::dispatchPacket(Packet* pPacket){
-
+Buffer* Accept::getBuffer(int length){
+	if(NULL == m_pBuffer){
+		m_pBuffer = new Buffer(length);
+		m_pBuffer->retain();
+	}
+	return m_pBuffer;
 }
 int Accept::readSocket(void){
 	static char recvBuffer[8192];
-    char* recvBufferPtr;
     int nread;
-    int packetLength;
-    int writeLength;
-    Packet* pPacket;
-    pPacket = m_tempReadPacket;
-    if( pPacket == NULL ){
-        nread = read(this->getSocketFD(), recvBuffer, 8192);
-    }else{
-        nread = read(this->getSocketFD(), pPacket->getCursorPtr(), pPacket->getLength()-pPacket->getCursor());
-    }
+    nread = read(this->getSocketFD(), recvBuffer, 8192);
     if(nread < 0){
         switch(errno){
         case EINTR: return 1; 	// 读数据失败，处理信号中断
@@ -157,43 +196,15 @@ int Accept::readSocket(void){
     }else if(nread == 0){
         return -1;
     }
-    //check stick message
-    if( NULL != pPacket ){
-    	pPacket->moveCursor(nread);
-    	if( pPacket->isCursorEnd() ){
-			// 派发消息给对应的消息处理器
-			dispatchPacket(pPacket);
-    		pPacket->release();		// 对应Packet创建时的retain
-			pPacket = NULL;
-    	}
-    }else{
-		if( nread < (int)sizeof(PacketHead) ){
-			return 0;
-		}
-		//这里读取的信息很可能包含多条信息，这时候需要解析出来；这几条信息因为太短，在发送时被底层socket合并了
-		recvBufferPtr = recvBuffer;
-        do{
-            packetLength = *(int*)((void*)(recvBufferPtr));
-			if( packetLength < (int)sizeof(PacketHead) || packetLength > getMaxLength() ){
-				fprintf(stderr, "head length is invalid packetLength=%d\n", packetLength);
-				break;	// 这里直接将数据丢弃
-			}
-            writeLength = std::min( (int)(nread-(recvBufferPtr-recvBuffer)), packetLength );
-			// 创建Packet对象，并将数据写入
-			pPacket = new Packet(packetLength);
-			pPacket->retain();	// 如果数据没有全部收到，那么m_tempReadPacket会保持这个retain状态
-			pPacket->write( recvBufferPtr, writeLength );
-            recvBufferPtr += writeLength;
-            if( pPacket->isCursorEnd() ){
-                // 派发消息给对应的消息处理器
-				dispatchPacket(pPacket);
-                pPacket->release();
-                pPacket = NULL;
-            }
-            // 如果消息没有全部接收，那么将会放到临时包中等待下一次读数据操作
-        }while(nread-(recvBufferPtr-recvBuffer) > (int)sizeof(PacketHead));
+    // check partner
+    if(NULL != m_pPartner && m_pPartner->getConnectionState() >= CS_CONNECT_OK){
+		m_pPartner->sendPacket(recvBuffer, nread);
+		return 0;
     }
-	m_tempReadPacket = pPacket;
+    // hash the buffer and wait client partner to create
+	Buffer* pBuffer = this->getBuffer(nread);
+	pBuffer->insert(pBuffer->end(), recvBuffer, recvBuffer + nread);
+	Proxy::getInstance()->getProxyLogic()->onReceiveMessage(this->getHandle(), pBuffer);
     return 0;
 }
 int Accept::writeSocket(Packet* pPacket){
@@ -210,6 +221,22 @@ int Accept::writeSocket(Packet* pPacket){
         return -1;
     }
     pPacket->moveCursor( nwrite );// used
+    return 0;
+}
+int Accept::writeSocket(const char* ptr, int length, int* writeLength){
+    int nwrite;
+    nwrite = write(this->getSocketFD(), ptr, length);
+    if(nwrite < 0){
+        switch(errno){
+        case EINTR: return 1; // 写数据失败，处理信号中断
+        case EAGAIN:    // 可以下次重新调用
+//            fprintf(stderr, "write EAGAIN capture\n");
+            return 2;
+        default: return -1;
+        }
+        return -1;
+    }
+    *writeLength = nwrite;
     return 0;
 }
 
