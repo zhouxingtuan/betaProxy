@@ -148,7 +148,7 @@ uint32 Proxy::openClient(const char* ip, uint16 port){
 		closeClient(handle);
 		return 0;
 	}
-	fprintf(stderr, "--Proxy::openClient handle=%d ip=%s port=%d bindHandle=%d\n", handle, ip, port, bindHandle);
+	fprintf(stderr, "--Proxy::openClient handle=%d ip=%s port=%d\n", handle, ip, port);
 	return handle;
 }
 void Proxy::receiveClient(Client* pClient){
