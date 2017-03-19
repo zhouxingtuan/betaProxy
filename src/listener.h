@@ -27,10 +27,10 @@ public:
 	Listener(void);
 	virtual ~Listener(void);
 
-	static Destination* createObject(void){
+	static Listener* createObject(void){
 		return new Listener();
 	}
-	static void releaseObject(Destination* pObj){
+	static void releaseObject(Listener* pObj){
 		if(NULL != pObj){
 			delete pObj;
 		}
