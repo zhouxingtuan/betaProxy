@@ -175,6 +175,7 @@ Client* Proxy::getClient(uint32 handle){
 bool Proxy::closeListener(uint32 handle){
 	Listener* pListener = this->getListener(handle);
 	if(NULL == pListener){
+		fprintf(stderr, "Proxy::closeListener Listener not found handle=%d\n", handle);
 		return false;
 	}
 	fprintf(stderr, "Proxy::closeListener handle=%d\n", handle);
@@ -185,6 +186,7 @@ bool Proxy::closeListener(uint32 handle){
 bool Proxy::closeAccept(uint32 handle){
 	Accept* pAccept = this->getAccept(handle);
 	if(NULL == pAccept){
+		fprintf(stderr, "Proxy::closeAccept Accept not found handle=%d\n", handle);
 		return false;
 	}
 	fprintf(stderr, "Proxy::closeAccept handle=%d\n", handle);
@@ -195,6 +197,7 @@ bool Proxy::closeAccept(uint32 handle){
 bool Proxy::closeClient(uint32 handle){
 	Client* pClient = this->getClient(handle);
 	if(NULL == pClient){
+		fprintf(stderr, "Proxy::closeClient Client not found handle=%d\n", handle);
 		return false;
 	}
 	fprintf(stderr, "Proxy::closeClient handle=%d\n", handle);
