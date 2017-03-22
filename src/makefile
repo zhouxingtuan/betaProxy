@@ -62,7 +62,7 @@ timer.o:common.o timer.cpp timer.h
 
 epoll.o:common.o epoll.cpp epoll.h
 
-log.o:timer.o log.cpp log.h
+log.o:common.o log.cpp log.h
 
 accept.o:object.o epoll.o packet.o timer.o accept.cpp accept.h
 

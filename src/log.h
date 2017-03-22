@@ -10,7 +10,6 @@
 #define __hive__log__
 
 #include "common.h"
-#include "timer.h"
 
 NS_HIVE_BEGIN
 
