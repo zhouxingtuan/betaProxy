@@ -47,25 +47,25 @@ bool Client::epollActive(uint32 events){
 		int error;
 		socklen_t len = sizeof(error);
 		if( getsockopt(this->getSocketFD(), SOL_SOCKET, SO_ERROR, &error, &len) < 0 ){
-			fprintf(stderr, "--Client::epollActive 1 failed to connect to handle=%d ip=%s port=%d\n", getHandle(), getIP(), getPort());
+			LOG_ERROR("failed to connect to handle=%d ip=%s port=%d", getHandle(), getIP(), getPort());
 			closeSocket();
 			this->epollRemove();
 		}
 		if(error){
 			if(error == EINTR || error == EINPROGRESS){
-				fprintf(stderr, "--Client::epollActive connect ing\n");
+				LOG_INFO("connect ing...");
 				return true;
 			}
-			fprintf(stderr, "--Client::epollActive 2 failed to connect to handle=%d ip=%s port=%d\n", getHandle(), getIP(), getPort());
+			LOG_ERROR("failed to connect to handle=%d ip=%s port=%d", getHandle(), getIP(), getPort());
 			closeSocket();
 			this->epollRemove();
 			return true;
 		}
-		fprintf(stderr, "--Client::epollActive connect OK to handle=%d ip=%s port=%d\n", getHandle(), getIP(), getPort());
+		LOG_ERROR("connect OK to handle=%d ip=%s port=%d", getHandle(), getIP(), getPort());
 		Proxy::getInstance()->receiveClient(this);
 		return true;
 	}
-//	fprintf(stderr, "--Client::epollActive OK getConnectionState()=%d\n", getConnectionState());
+	LOG_DEBUG("OK getConnectionState()=%d", getConnectionState());
 	return false;
 }
 void Client::epollRemove(void){

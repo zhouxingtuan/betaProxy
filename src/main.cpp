@@ -27,13 +27,13 @@ public:
 		// open the partner ? check the first message from front direction ?
 		SocketInformation* pInfo = Proxy::getInstance()->getNextDestination();
 		if(pInfo == NULL){
-			fprintf(stderr, "can not find a destination in proxy config\n");
+			LOG_ERROR("can not find a destination in proxy config");
 			Proxy::getInstance()->closeAccept(handle);
 			return;
 		}
 		uint32 clientHandle = Proxy::getInstance()->openPartner(handle, pInfo->ip, pInfo->port);
 		if(clientHandle == 0){
-			fprintf(stderr, "openPartner client failed ip=%s, port=%d\n", pInfo->ip, pInfo->port);
+			LOG_ERROR("openPartner client failed ip=%s, port=%d", pInfo->ip, pInfo->port);
 			Proxy::getInstance()->closeAccept(handle);
 			return;
 		}
@@ -42,10 +42,6 @@ public:
 
 int main(int argc, char *argv[])
 {
-	setLogLevel(0);
-	LOG_DEBUG("here is log debug")
-	LOG_INFO("here is log info")
-	LOG_ERROR("here is log error")
 	MyProxyLogic myLogic;
 	// 使用默认的信号处理
 	defaultSignalHandle();
@@ -54,7 +50,7 @@ int main(int argc, char *argv[])
 	Proxy::getInstance()->setProxyLogic(&myLogic);
 	Proxy::getInstance()->initialize();
 	Proxy::getInstance()->update();
-	fprintf(stderr, "proxy main exit\n");
+	LOG_INFO("proxy main exit");
 	Proxy::destroyInstance();
 
 	return 0;

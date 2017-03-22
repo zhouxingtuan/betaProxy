@@ -103,7 +103,7 @@ bool Timer::start(uint32 poolSize){
 		m_pPool->retain();
 	}
 	m_pPool->setMaxHashNumber(poolSize);
-	fprintf(stderr,"--Timer::start poolSize＝%d time=%d\n", poolSize, (int)time(NULL));
+	LOG_INFO("--Timer::start poolSize＝%d time=%d", poolSize, (int)time(NULL));
 	return true;
 }
 bool object_sort_function(const TimerObjectListPair& a, const TimerObjectListPair& b){
@@ -118,7 +118,6 @@ void Timer::update(void){
 	m_waitTimeout = MAX_INT64;
 	TimerObjectVector objects;
 	for(auto &pair : m_timerListMap ){
-//		fprintf(stderr, "update check timeCount=%lld\n", pair.second->getTimeCount());
 		pair.second->update(current_time, objects);
 		this->recordWaitTimeout(pair.second->getHeadCondition());
 	}
@@ -143,7 +142,6 @@ void Timer::update(void){
 			}
 		}
 		checkRemoveList();
-//		fprintf(stderr, "m_waitTimeout - get_time_ms() = %lld\n", m_waitTimeout - get_time_ms());
 	}
 }
 void Timer::checkRemoveList(void){

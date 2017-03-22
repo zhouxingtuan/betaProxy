@@ -52,7 +52,9 @@ systemsignal.o:systemsignal.cpp systemsignal.h
 
 token.o:common.o token.cpp token.h
 
-buffer.o:common.o buffer.cpp buffer.h
+log.o:common.o log.cpp log.h
+
+buffer.o:common.o log.o buffer.cpp buffer.h
 
 packet.o:buffer.o packet.cpp packet.h
 
@@ -61,8 +63,6 @@ object.o:common.o object.cpp object.h
 timer.o:common.o timer.cpp timer.h
 
 epoll.o:common.o epoll.cpp epoll.h
-
-log.o:common.o log.cpp log.h
 
 accept.o:object.o epoll.o packet.o timer.o accept.cpp accept.h
 

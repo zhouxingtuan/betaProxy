@@ -36,13 +36,14 @@ void Proxy::destroyInstance(void){
 void Proxy::onAcceptSocket(int fd, const char* ip, uint16 port, Listener* pListener){
 	uint32 handle = Proxy::getInstance()->openAccept(fd, ip, port);
 	if(handle == 0){
-		fprintf(stderr, "Proxy::onAcceptSocket openAccept failed fd=%d ip=%s port=%d\n", fd, ip, port);
+		LOG_ERROR("onAcceptSocket openAccept failed fd=%d ip=%s port=%d", fd, ip, port);
 	}else{
+		LOG_DEBUG("onAcceptSocket OK fd=%d ip=%s port=%d", fd, ip, port);
 		Proxy::getInstance()->getProxyLogic()->onReceiveAccept(handle, ip, port);
 	}
 }
 int64 Proxy::checkAcceptIdentify(Accept* pAccept){
-	fprintf(stderr, "--Proxy::checkAcceptIdentify handle=%d\n", pAccept->getHandle());
+	LOG_DEBUG("checkAcceptIdentify handle=%d", pAccept->getHandle());
 	pAccept->epollRemove();
 	return -1;
 }
@@ -73,10 +74,10 @@ SocketInformation* Proxy::getNextDestination(void){
 }
 
 uint32 Proxy::openListener(const char* ip, uint16 port, AcceptSocketFunction pFunc){
-	fprintf(stderr, "--Proxy::openListener try to open Listener ip=%s port=%d\n", ip, port);
+	LOG_DEBUG("openListener try to open Listener ip=%s port=%d", ip, port);
 	Listener* pListener = (Listener*)m_pListenerPool->create();
 	if(NULL == pListener){
-		fprintf(stderr, "--Proxy::openListener NULL == pListener\n");
+		LOG_ERROR("openListener NULL == pListener");
 		return 0;
 	}
 	uint32 handle = pListener->getHandle();
@@ -85,25 +86,25 @@ uint32 Proxy::openListener(const char* ip, uint16 port, AcceptSocketFunction pFu
 	pListener->setAcceptSocketFunction(pFunc);
 	if( !pListener->openSocket() ){
 		closeListener(handle);
-		fprintf(stderr, "--Proxy::openListener Listener openSocket failed\n");
+		LOG_ERROR("openListener Listener openSocket failed");
 		return 0;
 	}
 	if( !m_pEpoll->objectAdd(pListener, EPOLLIN) ){
 		pListener->closeSocket();
 		closeListener(handle);
-		fprintf(stderr, "--Proxy::openListener Listener objectAdd to epoll failed\n");
+		LOG_ERROR("openListener Listener objectAdd to epoll failed");
 		return 0;
 	}
-	fprintf(stderr, "--Proxy::openListener handle=%d fd=%d ip=%s port=%d\n", handle, pListener->getSocketFD(), ip, port);
+	LOG_DEBUG("openListener handle=%d fd=%d ip=%s port=%d", handle, pListener->getSocketFD(), ip, port);
 	return handle;
 }
 uint32 Proxy::openAccept(int fd, const char* ip, uint16 port){
-	fprintf(stderr, "--Proxy::openAccept fd=%d ip=%s port=%d\n", fd, ip, port);
+	LOG_DEBUG("openAccept fd=%d ip=%s port=%d", fd, ip, port);
 	// 获取一个连接对象Accept，将对象一并加入到epoll中
 	Accept* pAccept = m_pAcceptPool->create();
 	if(NULL == pAccept){
 		close(fd);
-		fprintf(stderr, "--Proxy::openAccept create accept NULL == pAccept\n");
+		LOG_ERROR("openAccept create accept NULL == pAccept");
 		return 0;
 	}
 	uint32 handle = pAccept->getHandle();
@@ -113,24 +114,24 @@ uint32 Proxy::openAccept(int fd, const char* ip, uint16 port){
 	if(fcntl(fd, F_SETFL, fcntl(fd, F_GETFD, 0)|O_NONBLOCK) == -1){
 		pAccept->closeSocket();
 		closeAccept(handle);
-		fprintf(stderr, "--Proxy::openAccept fcntl failed\n");
+		LOG_ERROR("openAccept fcntl failed");
 		return 0;
 	}
 	if( !m_pEpoll->objectAdd(pAccept, EPOLLIN) ){
 		pAccept->closeSocket();
 		closeAccept(handle);
-		fprintf(stderr, "--Proxy::openAccept objectAdd failed\n");
+		LOG_ERROR("openAccept objectAdd failed");
 		return 0;
 	}
 	pAccept->setConnectionState(CS_CONNECT_OK);
 	pAccept->setTimeout(CONNECT_IDENTIFY_TIME, Proxy::checkAcceptIdentify);
-	fprintf(stderr, "--Proxy::openAccept handle=%d fd=%d ip=%s port=%d\n", handle, fd, ip, port);
+	LOG_DEBUG("openAccept handle=%d fd=%d ip=%s port=%d", handle, fd, ip, port);
 	return handle;
 }
 uint32 Proxy::openClient(const char* ip, uint16 port){
 	Client* pClient = m_pClientPool->create();
 	if(NULL == pClient){
-		fprintf(stderr, "--Proxy::openClient create client NULL == pClient\n");
+		LOG_ERROR("openClient create client NULL == pClient");
 		return 0;
 	}
 	uint32 handle = pClient->getHandle();
@@ -138,20 +139,21 @@ uint32 Proxy::openClient(const char* ip, uint16 port){
 	pClient->setSocket(ip, port);
 	pClient->setConnectionState(CS_CONNECT_START);
 	if( !pClient->connectServer() ){
-		fprintf(stderr, "--Proxy::openClient Client::connectServer failed\n");
+		LOG_ERROR("openClient Client::connectServer failed");
 		closeClient(handle);
 		return 0;
 	}
 	// 添加当前的socket到epoll中进行监听
 	if( !m_pEpoll->objectAdd(pClient, EPOLLIN | EPOLLOUT) ){
-		fprintf(stderr, "--Proxy::openClient Epoll::objectAdd failed\n");
+		LOG_ERROR("openClient Epoll::objectAdd failed");
 		closeClient(handle);
 		return 0;
 	}
-	fprintf(stderr, "--Proxy::openClient handle=%d ip=%s port=%d\n", handle, ip, port);
+	LOG_DEBUG("openClient handle=%d ip=%s port=%d", handle, ip, port);
 	return handle;
 }
 void Proxy::receiveClient(Client* pClient){
+	LOG_DEBUG("receiveClient OK handle=%d", pClient->getHandle());
 	pClient->setConnectionState(CS_CONNECT_OK);
 	// 检查accept消息，把缓存发送到server
 	pClient->clearTimer();
@@ -175,10 +177,10 @@ Client* Proxy::getClient(uint32 handle){
 bool Proxy::closeListener(uint32 handle){
 	Listener* pListener = this->getListener(handle);
 	if(NULL == pListener){
-		fprintf(stderr, "Proxy::closeListener Listener not found handle=%d\n", handle);
+		LOG_ERROR("closeListener Listener not found handle=%d", handle);
 		return false;
 	}
-	fprintf(stderr, "Proxy::closeListener handle=%d\n", handle);
+	LOG_DEBUG("closeListener handle=%d", handle);
 	m_pEpoll->objectRemove(pListener);
 	pListener->resetData();
 	return m_pListenerPool->idle(handle);
@@ -186,10 +188,10 @@ bool Proxy::closeListener(uint32 handle){
 bool Proxy::closeAccept(uint32 handle){
 	Accept* pAccept = this->getAccept(handle);
 	if(NULL == pAccept){
-		fprintf(stderr, "Proxy::closeAccept Accept not found handle=%d\n", handle);
+		LOG_ERROR("closeAccept Accept not found handle=%d", handle);
 		return false;
 	}
-	fprintf(stderr, "Proxy::closeAccept handle=%d\n", handle);
+	LOG_DEBUG("closeAccept handle=%d", handle);
 	m_pEpoll->objectRemove(pAccept);
 	pAccept->resetData();
 	return m_pAcceptPool->idle(handle);
@@ -197,10 +199,10 @@ bool Proxy::closeAccept(uint32 handle){
 bool Proxy::closeClient(uint32 handle){
 	Client* pClient = this->getClient(handle);
 	if(NULL == pClient){
-		fprintf(stderr, "Proxy::closeClient Client not found handle=%d\n", handle);
+		LOG_ERROR("closeClient Client not found handle=%d", handle);
 		return false;
 	}
-	fprintf(stderr, "Proxy::closeClient handle=%d\n", handle);
+	LOG_DEBUG("closeClient handle=%d", handle);
 	m_pEpoll->objectRemove(pClient);
 	pClient->resetData();
 	return m_pClientPool->idle(handle);
@@ -219,7 +221,7 @@ void Proxy::initialize(void){
 		m_pEpoll = new Epoll();
 		m_pEpoll->retain();
 		if( !m_pEpoll->createEpoll() ){
-			fprintf(stderr, "ERROR Proxy createEpoll failed\n");
+			LOG_ERROR("Proxy createEpoll failed");
 		}
 	}
 	if(NULL == m_pTimer){
@@ -242,7 +244,7 @@ void Proxy::initialize(void){
 	this->initConfig();
 	uint32 listenHandle = openListener(m_listenInfo.ip, m_listenInfo.port, Proxy::onAcceptSocket);
 	if(listenHandle == 0){
-		fprintf(stderr, "listen failed ip=%s port=%d\n", m_listenInfo.ip, m_listenInfo.port);
+		LOG_ERROR("listen failed ip=%s port=%d", m_listenInfo.ip, m_listenInfo.port);
 	}
 }
 void Proxy::destroy(void){
@@ -269,6 +271,11 @@ bool Proxy::initConfig(void){
 		return false;
 	}
 	parse_ip_port(&m_listenInfo, itCur->second);
+	// 解析log_level
+	itCur = configMap.find("log_level");
+	if(itCur != configMap.end()){
+		setLogLevel(atoi(itCur->second.c_str()));
+	}
 	// 解析连接的目的地址
 	std::string mark = "des";
 	for(auto &kv : configMap){
@@ -278,7 +285,7 @@ bool Proxy::initConfig(void){
 			m_destinations.push_back(info);
 		}
 	}
-	fprintf(stderr, "listen ip=%s port=%d des size=%d\n", m_listenInfo.ip, m_listenInfo.port, (int)m_destinations.size());
+	LOG_INFO("listen ip=%s port=%d des size=%d", m_listenInfo.ip, m_listenInfo.port, (int)m_destinations.size());
 	return true;
 }
 
