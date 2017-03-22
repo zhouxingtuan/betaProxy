@@ -70,7 +70,7 @@ client.o:accept.o client.cpp client.h
 
 listener.o:object.o epoll.o listener.cpp listener.h
 
-proxy.o:accept.o client.o listener.o proxy.cpp proxy.h
+proxy.o:log.o accept.o client.o listener.o proxy.cpp proxy.h
 
 
 
