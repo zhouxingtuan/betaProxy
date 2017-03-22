@@ -103,7 +103,7 @@ bool Timer::start(uint32 poolSize){
 		m_pPool->retain();
 	}
 	m_pPool->setMaxHashNumber(poolSize);
-	LOG_INFO("--Timer::start poolSize＝%d time=%d", poolSize, (int)time(NULL));
+	LOG_INFO("start poolSize＝%d time=%d", poolSize, (int)time(NULL));
 	return true;
 }
 bool object_sort_function(const TimerObjectListPair& a, const TimerObjectListPair& b){
