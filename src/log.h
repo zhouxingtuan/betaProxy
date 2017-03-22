@@ -26,7 +26,7 @@ do{\
 	if( getLogLevel() > LOG_LEVEL_DEBUG ){\
 		break;\
 	}\
-	fprintf(stderr, "[%s %s]%s:%d %s():"fmt, __DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, ##args);\
+	fprintf(stderr, "[DEBUG][%s %s]%s:%d %s():" fmt "\n", __DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, ##args);\
 }while(0);
 
 #define LOG_RELEASE(fmt, args...)\
@@ -34,7 +34,7 @@ do{\
 	if( getLogLevel() > LOG_LEVEL_RELEASE ){\
 		break;\
 	}\
-	fprintf(stderr, "[%s %s]%s:%d %s():"fmt, __DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, ##args);\
+	fprintf(stderr, "[RELEASE][%s %s]%s:%d %s():" fmt "\n", __DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, ##args);\
 }while(0);
 
 #define LOG_ERROR(fmt, args...)\
@@ -42,7 +42,7 @@ do{\
 	if( getLogLevel() > LOG_LEVEL_ERROR ){\
 		break;\
 	}\
-	fprintf(stderr, "[%s %s]%s:%d %s():"fmt, __DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, ##args);\
+	fprintf(stderr, "[ERROR][%s %s]%s:%d %s():" fmt "\n", __DATE__, __TIME__, __FILE__, __LINE__, __FUNCTION__, ##args);\
 }while(0);
 
 NS_HIVE_END
