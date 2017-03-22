@@ -19,7 +19,7 @@ DEBUG= -g -ggdb
 
 
 OBJS = common.o systemsignal.o token.o buffer.o packet.o object.o timer.o epoll.o \
-		accept.o client.o listener.o proxy.o
+		log.o accept.o client.o listener.o proxy.o
 
 
 COBJS =
@@ -61,6 +61,8 @@ object.o:common.o object.cpp object.h
 timer.o:common.o timer.cpp timer.h
 
 epoll.o:common.o epoll.cpp epoll.h
+
+log.o:timer.o log.cpp log.h
 
 accept.o:object.o epoll.o packet.o timer.o accept.cpp accept.h
 

@@ -15,6 +15,7 @@
 #include "object.h"
 #include "timer.h"
 #include "epoll.h"
+#include "log.h"
 #include "accept.h"
 #include "client.h"
 #include "listener.h"
