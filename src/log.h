@@ -19,7 +19,7 @@ NS_HIVE_BEGIN
 #define LOG_LEVEL_ERROR 2
 
 extern void setLogLevel(int level);
-extern int getLogLevel(void) const;
+extern int getLogLevel(void);
 
 #define LOG_DEBUG(fmt, args...)\
 do{\

@@ -15,7 +15,7 @@ static int g_logLevel = 0;
 void setLogLevel(int level){
 	g_logLevel = level;
 }
-int getLogLevel(void) const{
+int getLogLevel(void){
 	return g_logLevel;
 }
 
