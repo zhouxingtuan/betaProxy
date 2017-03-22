@@ -26,7 +26,7 @@ do{\
 	if( getLogLevel() > LOG_LEVEL_DEBUG ){\
 		break;\
 	}\
-	fprintf(stderr, "[DEBUG][%s][%lld][%s:%d %s()]:" fmt "\n", getTimeString(), get_time_us(), __FILE__, __LINE__, __FUNCTION__, ##args);\
+	fprintf(stderr, "[DEBUG][%s][%lld][%s:%d %s()]:" fmt "\n", getTimeStringUS(), get_time_us(), __FILE__, __LINE__, __FUNCTION__, ##args);\
 }while(0);
 
 #define LOG_INFO(fmt, args...)\
@@ -34,7 +34,7 @@ do{\
 	if( getLogLevel() > LOG_LEVEL_INFO ){\
 		break;\
 	}\
-	fprintf(stderr, "[INFO ][%s][%lld][%s:%d %s()]:" fmt "\n", getTimeString(), get_time_us(), __FILE__, __LINE__, __FUNCTION__, ##args);\
+	fprintf(stderr, "[INFO ][%s][%lld][%s:%d %s()]:" fmt "\n", getTimeStringUS(), get_time_us(), __FILE__, __LINE__, __FUNCTION__, ##args);\
 }while(0);
 
 #define LOG_ERROR(fmt, ...)\
@@ -42,7 +42,7 @@ do{\
 	if( getLogLevel() > LOG_LEVEL_ERROR ){\
 		break;\
 	}\
-	fprintf(stderr, "[ERROR][%s][%lld][%s:%d %s()]:" fmt "\n", getTimeString(), get_time_us(), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
+	fprintf(stderr, "[ERROR][%s][%lld][%s:%d %s()]:" fmt "\n", getTimeStringUS(), get_time_us(), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__);\
 }while(0);
 
 NS_HIVE_END
