@@ -51,15 +51,24 @@ int64 Proxy::checkAcceptIdentify(Accept* pAccept){
 uint32 Proxy::openPartner(uint32 handle, const char* ip, uint16 port){
 	Accept* pAccept = this->getAccept(handle);
 	if(NULL == pAccept){
+		LOG_ERROR("pAccept == NULL handle=%d", handle);
 		return 0;
+	}
+	// we don't have to create partner twice
+	Accept* pPartner = pAccept->getPartner();
+	if(NULL != pPartner){
+		LOG_DEBUG("Accept Partner already create handle=%d", handle);
+		return pPartner->getHandle();
 	}
 	uint32 clientHandle = this->openClient(ip, port);
 	if(0 == clientHandle){
+		LOG_ERROR("openClient failed handle=%d", handle);
 		return 0;
 	}
 	Client* pClient = this->getClient(clientHandle);
 	pAccept->setPartner(pClient);
 	pClient->setPartner(pAccept);
+	LOG_DEBUG("openClient OK handle=%d clientHandle=%d", handle, pClient->getHandle());
 	return clientHandle;
 }
 SocketInformation* Proxy::getNextDestination(void){
