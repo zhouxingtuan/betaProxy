@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
 	setLogLevel(0);
 	LOG_DEBUG("here is log debug")
-	LOG_RELEASE("here is log release")
+	LOG_INFO("here is log info")
 	LOG_ERROR("here is log error")
 	MyProxyLogic myLogic;
 	// 使用默认的信号处理
