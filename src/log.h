@@ -20,6 +20,7 @@ NS_HIVE_BEGIN
 extern void setLogLevel(int level);
 extern int getLogLevel(void);
 extern const char* getTimeString(void);
+extern const char* getTimeStringUS(void);
 
 #define LOG_DEBUG(fmt, args...)\
 do{\
