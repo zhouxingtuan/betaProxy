@@ -35,7 +35,7 @@ const char* getTimeString(void){
 const char* getTimeStringUS(void){
 	timeval t;
 	gettimeofday( &t, NULL );
-	struct tm* ptm = localtime(&t);
+	struct tm* ptm = localtime(&t.tv_sec);
 	sprintf(g_timeStringUS, "%4d-%02d-%02d %02d:%02d:%02d %06d",
 		ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)t.tv_usec);
 	return g_timeStringUS;
