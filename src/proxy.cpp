@@ -47,7 +47,13 @@ int64 Proxy::checkAcceptIdentify(Accept* pAccept){
 	pAccept->epollRemove();
 	return -1;
 }
-
+bool Proxy::isPartnerOpened(uint32 handle){
+	Accept* pAccept = this->getAccept(handle);
+	if(NULL == pAccept){
+		return false;
+	}
+	return (NULL != pAccept->getPartner());
+}
 uint32 Proxy::openPartner(uint32 handle, const char* ip, uint16 port){
 	Accept* pAccept = this->getAccept(handle);
 	if(NULL == pAccept){

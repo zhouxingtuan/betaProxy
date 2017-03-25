@@ -25,6 +25,13 @@ public:
 	// after client to back server create success this will never call again;
 	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer){
 		// open the partner ? check the first message from front direction ?
+
+		// check if the partner is opened
+		if(Proxy::getInstance()->isPartnerOpened(handle)){
+			LOG_DEBUG("partner is already opened handle=%d", handle);
+			return;
+		}
+
 		SocketInformation* pInfo = Proxy::getInstance()->getNextDestination();
 		if(pInfo == NULL){
 			LOG_ERROR("can not find a destination in proxy config");

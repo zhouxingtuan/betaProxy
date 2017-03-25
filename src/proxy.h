@@ -71,6 +71,7 @@ public:
 	// output client handle
 	uint32 openPartner(uint32 handle, const char* ip, uint16 port);
 	SocketInformation* getNextDestination(void);
+	bool isPartnerOpened(uint32 handle);
 
 	uint32 openListener(const char* ip, uint16 port, AcceptSocketFunction pFunc);
 	uint32 openAccept(int fd, const char* ip, uint16 port);
