@@ -20,7 +20,5 @@ des_2	= 127.0.0.1:9002
 
 
 # More
-something still need to be done:
-1) need ro run a full test
-2) need debug/release/error log support
+You can modify the codes to suit yourself
 
