@@ -20,11 +20,7 @@ public:
 	virtual void onReceiveAccept(uint32 handle, const char* ip, uint16 port){
 		// open the partner ?
 
-	}
-	// receive message from accept;
-	// after client to back server create success this will never call again;
-	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer){
-		// open the partner ? check the first message from front direction ?
+        // todo : Use this codes to open connect right after receive a new connection
 
 		// check if the partner is opened
 		if(Proxy::getInstance()->isPartnerOpened(handle)){
@@ -44,6 +40,32 @@ public:
 			Proxy::getInstance()->closeAccept(handle);
 			return;
 		}
+	}
+	// receive message from accept;
+	// after client to back server create success this will never call again;
+	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer){
+		// open the partner ? check the first message from front direction ?
+
+        // todo : use this codes if you want to identify the connection.
+
+//		// check if the partner is opened
+//		if(Proxy::getInstance()->isPartnerOpened(handle)){
+//			LOG_DEBUG("partner is already opened handle=%d", handle);
+//			return;
+//		}
+//
+//		SocketInformation* pInfo = Proxy::getInstance()->getNextDestination();
+//		if(pInfo == NULL){
+//			LOG_ERROR("can not find a destination in proxy config");
+//			Proxy::getInstance()->closeAccept(handle);
+//			return;
+//		}
+//		uint32 clientHandle = Proxy::getInstance()->openPartner(handle, pInfo->ip, pInfo->port);
+//		if(clientHandle == 0){
+//			LOG_ERROR("openPartner client failed ip=%s, port=%d", pInfo->ip, pInfo->port);
+//			Proxy::getInstance()->closeAccept(handle);
+//			return;
+//		}
 	}
 };
 
