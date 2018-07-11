@@ -21,4 +21,5 @@ des_2	= 127.0.0.1:9002
 
 # More
 You can modify the codes to suit yourself
+You can modify the code in main.cpp file.
 
