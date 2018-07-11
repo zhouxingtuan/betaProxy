@@ -44,9 +44,9 @@ public:
 	// 对象被epoll激活时调用的函数，用于Listener
 	virtual bool epollActive(uint32 events) = 0;
 	// 处理数据读
-	virtual void epollIn(void) = 0;
+	virtual bool epollIn(void) = 0;
 	// 处理数据写
-	virtual void epollOut(void) = 0;
+	virtual bool epollOut(void) = 0;
 	// 处理移除socket
 	virtual void epollRemove(void) = 0;
 	// 处理socket最后的状态
@@ -131,10 +131,14 @@ public:
 					continue;
 				}
 				if(events & EPOLLIN){
-					pObject->epollIn();
+					if( !pObject->epollIn() ){
+						continue;
+					}
 				}
 				if(events & EPOLLOUT){
-					pObject->epollOut();
+					if( !pObject->epollOut() ){
+						continue;
+					}
 				}else if(events & EPOLLERR){
 					pObject->epollRemove();
 					continue;
