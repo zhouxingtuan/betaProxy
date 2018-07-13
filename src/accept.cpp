@@ -207,7 +207,7 @@ int Accept::readSocket(void){
     // hash the buffer and wait client partner to create
 	Buffer* pBuffer = this->getBuffer(nread);
 	pBuffer->insert(pBuffer->end(), recvBuffer, recvBuffer + nread);
-	Proxy::getInstance()->getProxyLogic()->onReceiveMessage(this->getHandle(), pBuffer);
+	Proxy::getInstance()->getProxyLogic()->onReceiveMessage(this->getHandle(), pBuffer, this->getIP(), this->getPort());
     return 0;
 }
 int Accept::writeSocket(Packet* pPacket){

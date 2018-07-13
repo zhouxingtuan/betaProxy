@@ -43,7 +43,7 @@ public:
 	}
 	// receive message from accept;
 	// after client to back server create success this will never call again;
-	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer){
+	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer, const char* ip, uint16 port){
 		// open the partner ? check the first message from front direction ?
 
         // todo : use this codes if you want to identify the connection.

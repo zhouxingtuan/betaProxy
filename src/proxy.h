@@ -35,7 +35,7 @@ public:
 	virtual void onReceiveAccept(uint32 handle, const char* ip, uint16 port) = 0;
 	// receive message from accept;
 	// after client to back server create success this will never call again;
-	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer) = 0;
+	virtual void onReceiveMessage(uint32 handle, Buffer* pBuffer, const char* ip, uint16 port) = 0;
 };
 
 typedef ObjectPool<Listener> ListenerPool;
