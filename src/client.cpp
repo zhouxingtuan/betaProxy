@@ -61,11 +61,11 @@ bool Client::epollActive(uint32 events){
 //			closeSocket();
 			return true;
 		}
-		LOG_ERROR("connect OK to handle=%d ip=%s port=%d", getHandle(), getIP(), getPort());
+		LOG_DEBUG("connect OK to handle=%d ip=%s port=%d", getHandle(), getIP(), getPort());
 		Proxy::getInstance()->receiveClient(this);
 		return true;
 	}
-	LOG_DEBUG("OK getConnectionState()=%d", getConnectionState());
+	//LOG_DEBUG("OK getConnectionState()=%d", getConnectionState());
 	return false;
 }
 void Client::epollRemove(void){
